@@ -1,9 +1,20 @@
 # **Detection framework**
 
+[![license](https://img.shields.io/static/v1?label=OS&message=linux|osx&color=green&style=plastic)]()
+[![Python](https://img.shields.io/static/v1?label=Python&message=3.10&color=blue&style=plastic)]()
+[![size](https://img.shields.io/github/languages/code-size/MarcoParola/detection_framework?style=plastic)]()
+[![license](https://img.shields.io/github/license/MarcoParola/detection_framework?style=plastic)]()
+
+
+
+
 A python wrapping framework for performing object detection tasks using deep learning architecture:
 - YOLOv7
 - Faster R-CNN
 - DEtection TRansformer DE-TR
+
+
+
 
 ## **Installation**
 
