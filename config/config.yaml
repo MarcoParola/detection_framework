@@ -1,0 +1,42 @@
+
+project_path: ${hydra:runtime.cwd}
+model: fasetRCNN
+dataset: coco
+model_name: model
+
+
+datasets:
+  n_classes: 3
+  color_channels: 3
+  labels:
+    - 0
+    - 1
+    - 2
+  class_name:
+    - 'neoplastic'
+    - 'aphthous'
+    - 'traumatic'
+  path: ${hydra:runtime.cwd}/data/
+  img_path: images/
+  filenames:
+    dataset: oral1.json
+    
+
+training:
+  wandb: false
+  lr: 1e-3
+  epochs: 150
+  batch: 64
+  early_stopping:
+    monitor: val_loss
+    min_delta: 0.0005
+    patience: 10
+
+models:
+  path: ${hydra:runtime.cwd}/models
+    
+
+wandb:
+  entity: mlpi
+  project: oral
+  tag: ""
