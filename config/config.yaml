@@ -18,8 +18,9 @@ datasets:
     - 'traumatic'
   path: ${hydra:runtime.cwd}/data/
   img_path: images/
+  original_data: orig/
   filenames:
-    dataset: oral1.json
+    dataset: coco_dataset.json
     
 
 training:

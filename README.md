@@ -23,8 +23,10 @@ To install the framework, simply clone the repository and install the necessary 
 git clone https://github.com/MarcoParola/detection_framework.git
 cd detection_framework
 mkdir data
-mkdir data/images
+mkdir data/orig
 mkdir models
+
+#TODO quando scarichi il file json, rinominalo con "coco_dataset.json"
 ```
 
 create and activate virtual environment, then install dependencies. 
