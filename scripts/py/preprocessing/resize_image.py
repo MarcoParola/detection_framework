@@ -38,12 +38,12 @@ def resizeImageAndBoundingBoxes(imgFile, bboxes, inputW, inputH, targetImgW, tar
 
 @hydra.main(config_path="../../../config/", config_name="config")
 def resize(cfg):
-    imageDir = os.path.join(cfg.project_path, 'data/orig/images')
+    imageDir = os.path.join(cfg.project_path, cfg.preproc.orig.img_path)
     annotationsFile = os.path.join(cfg.datasets.path, cfg.datasets.original_data, 'preprocessed_' + cfg.datasets.filenames.dataset)
     targetImgW = cfg.preproc.img_size.width
     targetImgH = cfg.preproc.img_size.height
-    outputImageDir = os.path.join(cfg.datasets.path,"images")
-    outputAnnotationsFile = os.path.join(cfg.datasets.path, "dataset.json")
+    outputImageDir = os.path.join(cfg.datasets.path, cfg.datasets.img_path)
+    outputAnnotationsFile = os.path.join(cfg.datasets.path, cfg.preproc.preprocessed_annotation)
 
     if not os.path.exists(outputImageDir):
         os.makedirs(outputImageDir)

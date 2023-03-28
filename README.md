@@ -22,9 +22,7 @@ To install the framework, simply clone the repository and install the necessary 
 ```sh
 git clone https://github.com/MarcoParola/detection_framework.git
 cd detection_framework
-mkdir data
-mkdir data/orig
-mkdir models
+mkdir models data data/orig data/yolo data/coco
 
 #TODO quando scarichi il file json, rinominalo con "coco_dataset.json"
 ```
@@ -41,6 +39,18 @@ download zip file containing images (oral1.zip) and coco dataset (oral1.json) an
 
 
 ## **Usage**
+
+### **Data preparation**
+Since this framework relies on different models, different data formats are needed. 
+During the project installation, 3 subfolders are created in data: orig, yolo and coco. 
+The basic idea is to put your dataset-images in the orig folder; then generate your yolo/coco dataset by using some preprocessing-converter scripts. Please note: if your data doesn't required any preprocessing, you can skip this step, and directily put your data in yolo or coco folder.
+
+```sh
+sh scripts/sh/clean.sh
+python -m scripts.py.preprocessing.resize_images preproc.img_size.width=640 preproc.img_size.height=640
+```
+
+
 
 ### **fine-tune a model**
 The basic command to find-tune a model is the following

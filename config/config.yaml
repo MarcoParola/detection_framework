@@ -5,6 +5,11 @@ dataset: coco
 model_name: model
 
 preproc:
+  preprocessed_annotation: dataset.json
+  orig:
+    img_path: data/orig/images
+
+
   img_size:
     width: 640
     height: 640
