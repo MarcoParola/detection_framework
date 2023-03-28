@@ -4,6 +4,10 @@ model: fasetRCNN
 dataset: coco
 model_name: model
 
+preproc:
+  img_size:
+    width: 640
+    height: 640
 
 datasets:
   n_classes: 3

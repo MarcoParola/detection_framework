@@ -179,7 +179,7 @@ def clean(cfg):
 
     # Replace 'your_coco_annotation_file_path' with the path to your COCO annotation file
     coco_annotation_file = os.path.join(cfg.datasets.path, cfg.datasets.original_data, cfg.datasets.filenames.dataset)
-    coco_annotation_file_tmp = os.path.join(cfg.datasets.path, cfg.datasets.original_data, 'tmp_' + cfg.datasets.filenames.dataset)
+    coco_annotation_file_tmp = os.path.join(cfg.datasets.path, cfg.datasets.original_data, 'preprocessed_' + cfg.datasets.filenames.dataset)
 
     coco_image_filenames = get_coco_image_filenames(coco_annotation_file)
     remove_images_not_in_coco(dest_folder, coco_image_filenames)
@@ -197,7 +197,6 @@ def clean(cfg):
     renamed_coco_data = rename_all_images_in_cocofile(coco_annotation_file_tmp, dest_folder)
     save_coco_annotation(renamed_coco_data, coco_annotation_file_tmp)
 
-    os.remove(coco_annotation_file_tmp)
     shutil.rmtree(src_folder)
     
 
