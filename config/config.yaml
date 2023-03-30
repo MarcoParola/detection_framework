@@ -1,4 +1,3 @@
-
 project_path: ${hydra:runtime.cwd}
 model: fasetRCNN
 dataset: coco
@@ -8,8 +7,6 @@ preproc:
   preprocessed_annotation: dataset.json
   orig:
     img_path: data/orig/images
-
-
   img_size:
     width: 640
     height: 640
@@ -30,6 +27,7 @@ datasets:
   original_data: orig/
   filenames:
     dataset: coco_dataset.json
+  dataset_type: train #Added by Lorenzo, ask Marco if ok
     
 
 training:

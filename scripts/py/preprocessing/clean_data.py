@@ -174,7 +174,7 @@ def clean(cfg):
     # Replace 'your_source_folder_path' with the path to the folder you want to search
     src_folder = os.path.join(cfg.project_path, 'data/orig/tmp')
     # Replace 'your_destination_folder_path' with the path to the destination folder
-    dest_folder = os.path.join(cfg.project_path, cfg.preproc.img_path)
+    dest_folder = os.path.join(cfg.project_path, cfg.preproc.orig.img_path)
     move_jpg_files_to_images_folder(src_folder, dest_folder)
 
     # Replace 'your_coco_annotation_file_path' with the path to your COCO annotation file
@@ -198,16 +198,6 @@ def clean(cfg):
     save_coco_annotation(renamed_coco_data, coco_annotation_file_tmp)
 
     shutil.rmtree(src_folder)
-    
-
-        
-
-
-    
-
-    
-
-    
 
 
 if __name__ == '__main__':
