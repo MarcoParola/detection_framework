@@ -37,7 +37,7 @@ def coco_to_yolo(cfg):
     coco_json_file = os.path.join(cfg.datasets.path, 'coco', cfg.datasets.dataset_type) + ".json"
     label_folder = os.path.join(cfg.datasets.path, 'yolo', cfg.datasets.dataset_type, 'labels')
     images_folder = os.path.join(cfg.datasets.path, 'yolo', cfg.datasets.dataset_type, 'images')
-    class_file = os.path.join(cfg.datasets.path, 'yolo', 'classes.txt')
+    class_file = os.path.join(cfg.datasets.path, 'yolo', cfg.datasets.class_file)
 
     if not os.path.exists(label_folder):
         os.makedirs(label_folder)

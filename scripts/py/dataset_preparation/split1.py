@@ -10,9 +10,9 @@ def split(cfg):
     annotationsFile = os.path.join(cfg.datasets.path, cfg.preproc.preprocessed_annotation)
     trainAnnotationFile = os.path.join(cfg.datasets.path,'coco','train.json')
     testAnnotationFile = os.path.join(cfg.datasets.path, 'coco', 'test.json')
-    aug_images_path = os.path.join(cfg.datasets.path, 'coco', 'aug_images')
+    aug_images_path = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
 
-    train_percentage = 0.6
+    train_percentage = cfg.preproc.split_percentage
 
     with open(annotationsFile, 'r') as f:
         coco_data = json.load(f)

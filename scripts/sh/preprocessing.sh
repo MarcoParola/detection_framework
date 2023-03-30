@@ -1,5 +1,5 @@
-# wget link oral1.zip 
-# wget link dataset.json
+wget https://drive.google.com/file/d/1xW63RZTvxrnLzTzpUx0kkh8d9IWepN4_/view?usp=sharing -P data/orig
+wget https://drive.google.com/file/d/1deqYC1PmjpMYDQP4DrELxTr25MFGGnzo/view?usp=share_link -P data/orig
 
 
 unzip ./data/orig/oral1.zip -d ./data/orig/tmp/

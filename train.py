@@ -1,14 +1,11 @@
 import hydra
 import os
-import numpy as np
-import matplotlib.pyplot as plt
-import os
 from ultralytics import YOLO
-import detectron2
 from detectron2.data.datasets import register_coco_instances
 from detectron2.engine import DefaultTrainer
 from detectron2.config import get_cfg
 from detectron2 import model_zoo
+
 
 
 def get_train_cfg(config_file_path, checkpoint_url, train_dataset_name, val_dataset_name, num_classes, device,
@@ -22,9 +19,9 @@ def get_train_cfg(config_file_path, checkpoint_url, train_dataset_name, val_data
 
     cfg.DATALOADER.NUM_WORKERS = 8
 
-    cfg.SOLVER.IMS_PER_BATCH = 8  # batch size
+    cfg.SOLVER.IMS_PER_BATCH = 4  # batch size
     cfg.SOLVER.BASE_LR = 0.001  # LR
-    cfg.SOLVER.MAX_ITER = 100  # longer for difficult dataset
+    cfg.SOLVER.MAX_ITER = 10000  # longer for difficult dataset
     cfg.SOLVER.STEPS = []  # do not decay learning rate
 
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = num_classes  # Set number of classes
@@ -41,7 +38,7 @@ def train(cfg):
 
         model = YOLO(model_path).load('yolov8n.pt')  # build from YAML and transfer weights
         # Train the model
-        model.train(data=data_path, epochs=10, imgsz=640, workers=8)
+        model.train(data=data_path, epochs=50, imgsz=640, workers=8, device=0)
 
     if cfg.model == 'coco':
         config_file_path = "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"
@@ -53,7 +50,7 @@ def train(cfg):
 
         num_classes = 3
 
-        device = "cpu"
+        device = "cuda"
 
         train_dataset_name = "oralcancer_train"
         val_dataset_name = "oralcancer_val"

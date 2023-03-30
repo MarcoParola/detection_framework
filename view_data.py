@@ -37,8 +37,6 @@ def view(cfg):
                 label_bbox = list(map(float, label_parts[1:]))
                 labels.append([label_class] + label_bbox)
 
-            print(labels)
-
             # Load the corresponding image
             img_file = os.path.join(image_folder, file_name.replace('.txt', '.jpg'))
             img = cv2.imread(img_file)

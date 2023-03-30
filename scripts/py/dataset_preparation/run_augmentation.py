@@ -119,7 +119,7 @@ def augmentation(cfg):
     annotationsFile = os.path.join(cfg.datasets.path, 'coco', 'train.json')
     testAnnotationFIle = os.path.join(cfg.datasets.path, 'coco', 'test.json')
     images_input_path = os.path.join(cfg.datasets.path, cfg.datasets.img_path)
-    images_output_path = os.path.join(cfg.datasets.path, 'coco', 'aug_images')
+    images_output_path =  os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
 
     with open(annotationsFile, "r") as f:
         coco_data = json.load(f)
