@@ -32,7 +32,14 @@ def get_train_cfg(config_file_path, checkpoint_url, train_dataset_name, val_data
 
 @hydra.main(config_path="./config/", config_name="config")
 def train(cfg):
+
+    prepare_config()
+
     if cfg.model == 'yolo':
+
+        # prepare data_file.yaml
+        # prepare model_file.yaml
+
         model_path = os.path.join(cfg.project_path, 'config', 'yolov8.yaml')
         data_path = os.path.join(cfg.project_path, 'config', 'yolodata.yaml')
 
@@ -40,7 +47,7 @@ def train(cfg):
         # Train the model
         model.train(data=data_path, epochs=50, imgsz=640, workers=8, device=0)
 
-    if cfg.model == 'coco':
+    if cfg.model == 'fasterRCNN':
         config_file_path = "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"
         checkpoint_url = "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"
 
