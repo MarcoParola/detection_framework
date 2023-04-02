@@ -1,44 +1,25 @@
 import hydra
 import os
-from ultralytics import YOLO
-from detectron2.config import get_cfg
-from detectron2 import model_zoo
-from detectron2.data import build_detection_test_loader
-from detectron2.data.datasets import register_coco_instances
-from detectron2.engine import DefaultPredictor
-from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-from detectron2.data import DatasetCatalog
-from detectron2.utils.visualizer import Visualizer
-from detectron2.utils.visualizer import ColorMode
 import cv2
 
+from ultralytics import YOLO
 
+from detectron2.engine import DefaultPredictor
+from detectron2.data import DatasetCatalog
+from detectron2.utils.visualizer import Visualizer
 
-def get_train_cfg(config_file_path, model_final, num_classes, device, score_thresh_test):
-    cfg = get_cfg()
+from scripts.py.prepare_config import prepare_config
 
-    cfg.merge_from_file(model_zoo.get_config_file(config_file_path))
-    cfg.MODEL.WEIGHTS = model_final  # Let training initialize from model zoo
-
-    cfg.DATALOADER.NUM_WORKERS = 8
-
-    cfg.SOLVER.IMS_PER_BATCH = 4  # batch size
-
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = num_classes  # Set number of classes
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh_test # Set threshold for this model
-    cfg.MODEL.DEVICE = device  # CUDA
-
-    return cfg
 
 @hydra.main(config_path="./config/", config_name="config")
 def detect(cfg):
     if cfg.model == 'yolo':
-        model_path = os.path.join(cfg.project_path, 'runs', 'detect', 'train', 'weights', 'best.pt')
+        model_path = os.path.join(cfg.project_path, cfg.yolo.parameters.output_dir, cfg.yolo.yolo_model_path)
         model = YOLO(model_path)  # load a custom model
 
         # define paths to input and output folders
-        input_folder = os.path.join(cfg.datasets.path, 'yolo', 'test', 'images')
-        output_folder = os.path.join(cfg.project_path, 'outputs', 'yolo', 'model_results_on_test')
+        input_folder = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.yolo.test, cfg.datasets.img_path)
+        output_folder = os.path.join(cfg.project_path, cfg.yolo.yolo_detect_output_path)
 
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
@@ -58,30 +39,17 @@ def detect(cfg):
             cv2.imwrite(output_path, res_plotted)
 
 
-    if cfg.model == 'coco':
-        images_path = os.path.join(cfg.datasets.path, "coco", "aug_images")
-        output_folder = os.path.join(cfg.project_path, 'outputs', 'coco', 'model_results_on_test')
-
+    if cfg.model == 'fasterRCNN':
+        output_folder = os.path.join(cfg.project_path, cfg.fastercnn.fastercnn_detect_output_path)
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        test_dataset_name = "oralcancer_test"
-        test_json_annot_path = os.path.join(cfg.datasets.path, "coco", "test.json")
-
-        register_coco_instances(test_dataset_name, {}, test_json_annot_path, images_path)
-
-        config_file_path = "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"
-        model_final = os.path.join(cfg.project_path, 'outputs', 'coco_object_detection', 'model_final.pth')  # Set path model .pth
-        num_classes = 3
-        device = "cuda"
-        score_thresh_test = 0.5
-
-        config = get_train_cfg(config_file_path, model_final, num_classes, device, score_thresh_test)
+        cfg.fastercnn.parameters.checkpoint_url = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir, cfg.fastercnn.fastercnn_model_path)
+        config = prepare_config(cfg)
 
         predictor = DefaultPredictor(config)
 
-        test_dataset_dicts = DatasetCatalog.get(test_dataset_name)
-
+        test_dataset_dicts = DatasetCatalog.get(cfg.fastercnn.parameters.test_dataset_name)
         # Loop over each image in the test dataset
         for d in test_dataset_dicts:
             # Load the image

@@ -1,5 +1,0 @@
-train: ../data/yolo/train  # train images (relative to 'path') 128 images
-val: ../data/yolo/val  # val images (relative to 'path') 128 images
-test: ../data/yolo/test # test images (optional)
-
-names: {class_list_names}

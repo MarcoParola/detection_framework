@@ -1,8 +1,7 @@
 import json
 import os
-import hydra
 import shutil
-
+import hydra
 
 def parse_coco_json(coco_json_file):
     with open(coco_json_file, "r") as f:

@@ -3,6 +3,12 @@ model: fasetRCNN
 dataset: coco
 model_name: model
 
+#added by lorenzo
+config:
+  config_path: config
+  templates_path: config/templates
+  actual_config_path: config/actual_config
+
 preproc:
   preprocessed_annotation: dataset.json
   orig:
@@ -32,18 +38,64 @@ datasets:
   filenames:
     dataset: coco_dataset.json
   dataset_type: train  #Added by Lorenzo, ask Marco if ok -> used in coco_to_yolo.py
+  datasets_path:
+    coco:
+      train: coco/train.json
+      val: coco/val.json
+      test: coco/test.json
+    yolo:
+      train: yolo/train
+      val: yolo/val
+      test: yolo/test
+
+
+#added by lorenzo
+yolo:
+  yolo_templates:
+    model_template: yolov8-model-template.yaml
+    data_template: yolov8-data-template.yaml
+  yolo_config:
+    model_config: yolov8-model.yaml
+    data_config: yolov8-data.yaml
+  yolo_model: yolov8n.pt
+  parameters:
+    device: 0
+    output_dir: outputs/yolo/model_outputs
+  yolo_model_path: train/weights/best.pt
+  yolo_detect_output_path: outputs/yolo/model_results_on_test
+
+
+#added by lorenzo
+fastercnn:
+  parameters:
+    train_dataset_name: oralcancer_train
+    val_dataset_name: oralcancer_val
+    test_dataset_name: oralcancer_test
+    config_file_path: COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml
+    checkpoint_url: COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml
+    output_dir: outputs/fastercnn/model_outputs
+    device: cuda
+  fastercnn_model_path: model_final.pth
+  fastercnn_detect_output_path: outputs/fastercnn/model_results_on_test
 
 
 training:
   wandb: false
   lr: 1e-3
-  epochs: 150
-  batch: 64
+  epochs: 50
+  batch: 8
   early_stopping:
     monitor: val_loss
     min_delta: 0.0005
-    patience: 10
+    patience: 3
 
+  optimizer: SGD #added by lorenzo
+  workers: 8 #added by lorenzo
+  img_size: 640 #added by lorenzo
+
+test:
+  confidence_threshold: 0.2
+  iou_threshold: 0.5
 
 models:
   path: ${hydra:runtime.cwd}/models

@@ -1,10 +1,9 @@
+import cv2
 import json
+import hydra
+import os
 import imgaug.augmenters as iaa
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
-import os
-import cv2
-import hydra
-
 
 def augment_image_and_annotation(image, annotation):
     # Define the augmentation pipeline

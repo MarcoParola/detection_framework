@@ -1,7 +1,7 @@
 import json
-import random
 import hydra
 import os
+import random
 import shutil
 
 @hydra.main(config_path="../../../config/", config_name="config")

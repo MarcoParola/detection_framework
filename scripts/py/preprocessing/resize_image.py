@@ -1,11 +1,10 @@
-import imgaug as ia
+from collections import defaultdict
+import cv2
+import json
+import hydra
+import os
 import imgaug.augmenters as iaa
 from imgaug.augmentables.bbs import BoundingBox
-from collections import defaultdict
-import json
-import cv2
-import os
-import hydra
 
 def build_dictionaries(data):
     print("Building dictionaries...")

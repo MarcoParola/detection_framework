@@ -56,8 +56,8 @@ def view(cfg):
 
 
     elif cfg.dataset == 'coco':
-        img_path = os.path.join(cfg.datasets.path, 'coco', 'aug_images')
-        coco_file = os.path.join(cfg.datasets.path, 'coco', 'train.json')
+        img_path = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
+        coco_file = os.path.join(cfg.datasets.path, 'coco', cfg.datasets.dataset_type + '.json')
 
         dataset = fo.Dataset.from_dir(
             dataset_type=fo.types.COCODetectionDataset,
