@@ -1,7 +1,5 @@
 import hydra
 import os
-from ultralytics import YOLO
-from detectron2.engine import DefaultTrainer
 from scripts.py.prepare_config import prepare_config
 
 
@@ -11,6 +9,7 @@ def train(cfg):
     config = prepare_config(cfg)
 
     if cfg.model == 'yolo':
+        from ultralytics import YOLO
         model_path = os.path.join(cfg.project_path, cfg.config.actual_config_path, cfg.yolo.yolo_config.model_config)
         yolo_model_path = os.path.join(cfg.project_path, cfg.models.path, 'yolo', cfg.yolo.yolo_model)
 
@@ -18,6 +17,7 @@ def train(cfg):
         model.train(**config)   # Train the model
 
     if cfg.model == 'fasterRCNN':
+        from detectron2.engine import DefaultTrainer
         trainer = DefaultTrainer(config)
         trainer.resume_or_load(resume=False)
         trainer.train()
