@@ -32,6 +32,7 @@ create and activate virtual environment, then install dependencies.
 python -m venv env
 . env/bin/activate
 python -m pip install -r requirements.txt 
+python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
 ```
 
 download zip file containing images (oral1.zip) and coco dataset (oral1.json) and put cocodataset in `./data/`.
