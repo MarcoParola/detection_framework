@@ -32,6 +32,7 @@ create and activate virtual environment, then install dependencies.
 python -m venv env
 . env/bin/activate
 python -m pip install -r requirements.txt 
+python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
 ```
 
 download zip file containing images (oral1.zip) and coco dataset (oral1.json) and put cocodataset in `./data/`.
@@ -46,8 +47,8 @@ During the project installation, 3 subfolders are created in data: orig, yolo an
 The basic idea is to put your dataset-images in the orig folder; then generate your yolo/coco dataset by using some preprocessing-converter scripts. Please note: if your data doesn't required any preprocessing, you can skip this step, and directily put your data in yolo or coco folder.
 
 ```sh
-sh scripts/sh/clean.sh
-python -m scripts.py.preprocessing.resize_images preproc.img_size.width=640 preproc.img_size.height=640
+sh scripts/sh/preprocessing.sh
+python -m scripts.py.preprocessing.resize_image preproc.img_size.width=640 preproc.img_size.height=640
 ```
 
 
