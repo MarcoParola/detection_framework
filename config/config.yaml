@@ -2,6 +2,7 @@ project_path: ${hydra:runtime.cwd}
 model: fasetRCNN
 dataset: coco
 model_name: model
+os_distrib: windows #added by lorenzo
 
 #added by lorenzo
 config:
@@ -77,6 +78,18 @@ fastercnn:
     device: cuda
   fastercnn_model_path: model_final.pth
   fastercnn_detect_output_path: outputs/fastercnn/model_results_on_test
+
+detr:
+  detr_path: detr
+  detr_main_path: detr/main.py
+  parameters:
+    dataset_file: coco
+    coco_path: data/coco
+    output_dir: outputs/detr/model_outputs
+    device: cuda
+    resume: https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
+
+
 
 
 training:

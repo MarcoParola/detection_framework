@@ -1,6 +1,7 @@
 import hydra
 import os
 
+import torch
 from ultralytics import YOLO
 from detectron2.data import build_detection_test_loader
 from detectron2.engine import DefaultPredictor
@@ -26,6 +27,10 @@ def test(cfg):
         evaluator = COCOEvaluator(cfg.fastercnn.parameters.test_dataset_name, config, False, output_dir=cfg.fastercnn.parameters.output_dir)
         test_loader = build_detection_test_loader(config, cfg.fastercnn.parameters.test_dataset_name)
         inference_on_dataset(predictor.model, test_loader, evaluator)
+
+    if cfg.model == 'detr':
+        return
+
 
 if __name__ == '__main__':
     test()
