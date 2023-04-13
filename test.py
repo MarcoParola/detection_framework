@@ -1,3 +1,5 @@
+import subprocess
+
 import hydra
 import os
 
@@ -9,9 +11,10 @@ from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 
 from scripts.py.prepare_config import prepare_config
 
-@hydra.main(config_path="./config/", config_name="config")
+@hydra.main(config_path="./config/", config_name="config", version_base=None)
 def test(cfg):
-    config = prepare_config(cfg)
+    config = prepare_config(cfg, "test")
+
     if cfg.model == 'yolo':
         model_path = os.path.join(cfg.project_path, cfg.yolo.parameters.output_dir, cfg.yolo.yolo_model_path)
         model = YOLO(model_path)  # load a custom model
@@ -19,9 +22,6 @@ def test(cfg):
         model.val(**config)  # no arguments needed, dataset and settings remembered
 
     if cfg.model == 'fasterRCNN':
-        cfg.fastercnn.parameters.checkpoint_url = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir, cfg.fastercnn.fastercnn_model_path)
-        config = prepare_config(cfg)
-
         predictor = DefaultPredictor(config)
 
         evaluator = COCOEvaluator(cfg.fastercnn.parameters.test_dataset_name, config, False, output_dir=cfg.fastercnn.parameters.output_dir)
@@ -29,7 +29,17 @@ def test(cfg):
         inference_on_dataset(predictor.model, test_loader, evaluator)
 
     if cfg.model == 'detr':
-        return
+        process = subprocess.Popen(config.split(), stdout=subprocess.PIPE)
+
+        # Read the output of the subprocess while it is running
+        while True:
+            output = process.stdout.readline()
+            if not output:
+                break
+            print(output.decode().strip())
+
+        # Wait for the subprocess to finish
+        process.wait()
 
 
 if __name__ == '__main__':

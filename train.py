@@ -7,13 +7,13 @@ import os
 from ultralytics import YOLO
 from detectron2.engine import DefaultTrainer
 from scripts.py.prepare_config import prepare_config
-from print_test import CocoTrainer
+from print_test import CustomTrainer
 
 
-@hydra.main(config_path="./config/", config_name="config")
+@hydra.main(config_path="./config/", config_name="config", version_base=None)
 def train(cfg):
 
-    config = prepare_config(cfg)
+    config = prepare_config(cfg, "train")
 
     if cfg.model == 'yolo':
         model_path = os.path.join(cfg.project_path, cfg.config.actual_config_path, cfg.yolo.yolo_config.model_config)
@@ -23,9 +23,12 @@ def train(cfg):
         model.train(**config)   # Train the model
 
     if cfg.model == 'fasterRCNN':
-        trainer = CocoTrainer(config)
+        trainer = CustomTrainer(config, cfg.training.early_stopping.patience)
         trainer.resume_or_load(resume=False)
-        trainer.train()
+        try:
+            trainer.train()
+        except Exception:
+            print(f"\033[32mEarly stopping triggered \033[0m")
 
     if cfg.model == "detr":
 

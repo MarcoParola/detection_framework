@@ -1,34 +1,12 @@
 import json
+import math
+
 import hydra
 import os
 
 from detectron2.config import get_cfg
 from detectron2.model_zoo import model_zoo
 from detectron2.data.datasets import register_coco_instances
-
-'''class EarlyStoppingHook(HookBase):
-    def __init__(self,cfg,config, patience=5, delta=0):
-        self.patience = patience
-        self.delta = delta
-        self.best_loss = float('inf')
-        self.counter = 0
-        self.n_iters_counter = 0
-        self.n_iters_in_epoch = int(config.SOLVER.MAX_ITER / cfg.training.epochs)
-
-    def after_step(self):
-        if(self.n_iters_in_epoch == self.n_iters_counter):
-            loss = self.trainer.storage.history('total_loss').avg(self.n_iters_in_epoch)
-            print(loss)
-            if loss < self.best_loss - self.delta:
-                self.best_loss = loss
-                self.counter = 0
-            else:
-                self.counter += 1
-                if self.counter >= self.patience:
-                    raise Exception('Early stopping triggered')
-            self.n_iters_counter = 0
-        else:
-            self.n_iters_counter += 1'''
 
 
 def get_yolo_configuration(cfg):
@@ -48,31 +26,49 @@ def get_yolo_configuration(cfg):
     return config
 
 
-def get_detr_configuration(cfg):
+def get_detr_configuration(cfg, mode):
     if (cfg.os_distrib == "windows"):
-        venv_python_path = os.path.join(cfg.project_path, "venv", "Scripts", "python.exe")  # for Windows
+        venv_python_path = os.path.join(cfg.project_path, cfg.env_folder, "Scripts", "python.exe")  # for Windows
     else:
-        venv_python_path = os.path.join(cfg.project_path, "venv", "bin", "python")
+        venv_python_path = os.path.join(cfg.project_path, cfg.env_folder, "bin", "python")
 
     main_path = os.path.join(cfg.models.path, cfg.detr.detr_main_path)
-    batch_size = cfg.training.batch
-    epochs = cfg.training.epochs
-    num_classes = cfg.datasets.n_classes
     dataset_file = cfg.detr.parameters.dataset_file
     coco_path = os.path.join(cfg.project_path, cfg.detr.parameters.coco_path)
-    output_dir = os.path.join(cfg.project_path, cfg.detr.parameters.output_dir)
     device = cfg.detr.parameters.device
-    resume = cfg.detr.parameters.resume  # detr-resnet50
+    output_dir = os.path.join(cfg.project_path, cfg.detr.parameters.output_dir)
 
-    config = f"{venv_python_path} {main_path} " \
-             f"--batch_size={batch_size} " \
-             f"--epochs={epochs} " \
-             f"--num_classes={num_classes} " \
-             f"--dataset_file={dataset_file} " \
-             f"--coco_path {coco_path} " \
-             f"--output_dir={output_dir} " \
-             f"--device={device} " \
-             f"--resume={resume}"
+    if (mode == "train"):
+        batch_size = cfg.training.batch
+        epochs = cfg.training.epochs
+        num_classes = cfg.datasets.n_classes
+        resume = cfg.detr.parameters.resume  # detr-resnet50
+
+        config = f"{venv_python_path} {main_path} " \
+                 f"--batch_size={batch_size} " \
+                 f"--epochs={epochs} " \
+                 f"--num_classes={num_classes} " \
+                 f"--dataset_file={dataset_file} " \
+                 f"--coco_path {coco_path} " \
+                 f"--output_dir={output_dir} " \
+                 f"--device={device} " \
+                 f"--resume={resume}"
+
+    else:
+        num_classes = cfg.datasets.n_classes + 1
+        resume = os.path.join(output_dir, cfg.detr.detr_model_path)  # trained model
+        output_dir = os.path.join(output_dir, "eval_outputs")
+
+        config = f"{venv_python_path} {main_path} " \
+                 f"--num_classes={num_classes} " \
+                 f"--dataset_file={dataset_file} " \
+                 f"--coco_path {coco_path} " \
+                 f"--output_dir={output_dir} " \
+                 f"--device={device} " \
+                 f"--resume={resume} " \
+                 f"--eval"
+
+        print(config)
 
     return config
 
@@ -84,8 +80,9 @@ def get_num_images(json_path):
     return len(image_ids)
 
 
-def get_fastercnn_configuration(cfg):
+def get_fastercnn_configuration(cfg, mode):
     images_path = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
+    output_dir = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir)
 
     train_json_annot_path = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.train)
     val_json_annot_path = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.val)
@@ -105,12 +102,12 @@ def get_fastercnn_configuration(cfg):
     config = get_cfg()
 
     config.merge_from_file(model_zoo.get_config_file(cfg.fastercnn.parameters.config_file_path))
-    try:
+    if mode == "train":
         config.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
             cfg.fastercnn.parameters.checkpoint_url)  # Let training initialize from model zoo
         config.DATASETS.TEST = (cfg.fastercnn.parameters.val_dataset_name,)
-    except RuntimeError:
-        config.MODEL.WEIGHTS = cfg.fastercnn.parameters.checkpoint_url
+    else:
+        config.MODEL.WEIGHTS = os.path.join(output_dir,cfg.fastercnn.fastercnn_model_path)
         config.DATASETS.TEST = (cfg.fastercnn.parameters.test_dataset_name,)
 
     config.DATASETS.TRAIN = (cfg.fastercnn.parameters.train_dataset_name,)
@@ -119,14 +116,16 @@ def get_fastercnn_configuration(cfg):
 
     config.SOLVER.IMS_PER_BATCH = cfg.training.batch  # batch size
     config.SOLVER.BASE_LR = cfg.training.lr  # LR
-    config.SOLVER.MAX_ITER = int((num_train_images / cfg.training.batch) * cfg.training.epochs)
+    config.SOLVER.MAX_ITER = math.ceil(num_train_images / cfg.training.batch * cfg.training.epochs)
 
     config.MODEL.ROI_HEADS.NUM_CLASSES = cfg.datasets.n_classes  # Set number of classes
     config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = cfg.test.confidence_threshold  # Set confidence score threshold for this model
     config.MODEL.ROI_HEADS.NMS_THRESH_TEST = cfg.test.iou_threshold  # Set iou score threshold for this model
     config.MODEL.DEVICE = cfg.fastercnn.parameters.device  # CUDA
 
-    output_dir = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir)
+    config.TEST.EVAL_PERIOD = math.ceil(num_train_images / cfg.training.batch)
+
+
     config.OUTPUT_DIR = output_dir
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -145,8 +144,7 @@ def create_config_file(template_path, config_path, **kwargs):
             print(e)
 
 
-@hydra.main(config_path="../../config/", config_name="config")
-def prepare_config(cfg):
+def prepare_config(cfg, mode):
     '''function to create the configuration for a specific model starting from its 
     template configuration file'''
 
@@ -180,15 +178,11 @@ def prepare_config(cfg):
         return config
 
     if cfg.model == 'fasterRCNN':
-        config = get_fastercnn_configuration(cfg)
+        config = get_fastercnn_configuration(cfg,mode)
 
         return config
 
     if cfg.model == 'detr':
-        config = get_detr_configuration(cfg)
+        config = get_detr_configuration(cfg,mode)
 
         return config
-
-
-if __name__ == '__main__':
-    prepare_config()

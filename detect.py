@@ -45,7 +45,7 @@ def detect(cfg):
             os.makedirs(output_folder)
 
         cfg.fastercnn.parameters.checkpoint_url = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir, cfg.fastercnn.fastercnn_model_path)
-        config = prepare_config(cfg)
+        config = prepare_config(cfg, 'test')
 
         predictor = DefaultPredictor(config)
 
