@@ -1,5 +1,4 @@
-train: {train_path}  # train images (relative to 'path') 128 images
-val: {val_path}  # val images (relative to 'path') 128 images
-test: {test_path} # test images (optional)
+train: {train_path}  # train images
+val: {val_path}  # val images
 
 names: {class_list_names}

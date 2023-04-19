@@ -1,9 +1,7 @@
 project_path: ${hydra:runtime.cwd}
-model: fasetRCNN
+model: yolo
 dataset: coco
 model_name: model
-os_distrib: windows #added by lorenzo
-env_folder: venv
 
 #added by lorenzo
 config:
@@ -58,7 +56,8 @@ yolo:
     data_template: yolov8-data-template.yaml
   yolo_config:
     model_config: yolov8-model.yaml
-    data_config: yolov8-data.yaml
+    data_config_train: yolov8-data.yaml
+    data_config_test: yolov8-data-test.yaml
   yolo_model: yolov8n.pt
   parameters:
     device: 0
@@ -82,14 +81,17 @@ fastercnn:
 
 detr:
   detr_path: detr
-  detr_main_path: detr/main.py
   parameters:
-    dataset_file: coco
+    dataset_file: custom
     coco_path: data/coco
-    output_dir: outputs/detr/model_outputs
+    output_dir: outputs/detr
+    logs_dir: training_logs
     device: cuda
-    resume: https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth
-  detr_model_path: checkpoint.pth
+    feature_extractor: facebook/detr-resnet-50
+    lr_backbone: 1e-05
+    gradient_clip_val: 0.1
+  detr_model_path: model.pth
+  detr_detect_output_path: outputs/detr/model_results_on_test
 
 
 
@@ -99,11 +101,12 @@ training:
   lr: 1e-3
   epochs: 50
   batch: 8
+  val_batch: 2
   early_stopping:
     monitor: val_loss
     min_delta: 0.0005
     patience: 3
-
+  weight_decay: 0.0001
   optimizer: SGD #added by lorenzo
   workers: 8 #added by lorenzo
   img_size: 640 #added by lorenzo

@@ -11,6 +11,8 @@ from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 
 from scripts.py.prepare_config import prepare_config
 
+from models.detr.train import DetrTrainer
+
 @hydra.main(config_path="./config/", config_name="config", version_base=None)
 def test(cfg):
     config = prepare_config(cfg, "test")
@@ -29,17 +31,15 @@ def test(cfg):
         inference_on_dataset(predictor.model, test_loader, evaluator)
 
     if cfg.model == 'detr':
-        process = subprocess.Popen(config.split(), stdout=subprocess.PIPE)
-
-        # Read the output of the subprocess while it is running
-        while True:
-            output = process.stdout.readline()
-            if not output:
-                break
-            print(output.decode().strip())
-
-        # Wait for the subprocess to finish
-        process.wait()
+        detr = DetrTrainer(**config)
+        train_dataset, _, test_dataset = detr.create_dataset()
+        train_dataloader = detr.data_loader(train_dataset, batch_size=config['train_batch_size'])
+        test_dataloader = detr.data_loader(test_dataset, batch_size=config['test_batch_size'])
+        model_path = os.path.join(config["output_path"], config["model_path"])
+        model = detr.build_model(train_dataloader, test_dataloader)
+        print(model_path)
+        model = model.load_from_checkpoint(model_path, **config)
+        detr.evaluation(test_dataset, test_dataloader, model)
 
 
 if __name__ == '__main__':

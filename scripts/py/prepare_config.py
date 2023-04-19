@@ -9,10 +9,17 @@ from detectron2.model_zoo import model_zoo
 from detectron2.data.datasets import register_coco_instances
 
 
-def get_yolo_configuration(cfg):
+def get_yolo_configuration(cfg, mode):
+
+    if (mode == "train"):
+        data_path = os.path.join(cfg.project_path, cfg.config.actual_config_path, cfg.yolo.yolo_config.data_config_train)
+    else:
+        data_path = os.path.join(cfg.project_path, cfg.config.actual_config_path,
+                                 cfg.yolo.yolo_config.data_config_test)
+
     config = {
         "project": os.path.join(cfg.project_path, cfg.yolo.parameters.output_dir),
-        "data": os.path.join(cfg.project_path, cfg.config.actual_config_path, cfg.yolo.yolo_config.data_config),
+        "data": data_path,
         "lr0": cfg.training.lr,
         "epochs": cfg.training.epochs,
         "batch": cfg.training.batch,
@@ -27,48 +34,32 @@ def get_yolo_configuration(cfg):
 
 
 def get_detr_configuration(cfg, mode):
-    if (cfg.os_distrib == "windows"):
-        venv_python_path = os.path.join(cfg.project_path, cfg.env_folder, "Scripts", "python.exe")  # for Windows
-    else:
-        venv_python_path = os.path.join(cfg.project_path, cfg.env_folder, "bin", "python")
 
-    main_path = os.path.join(cfg.models.path, cfg.detr.detr_main_path)
-    dataset_file = cfg.detr.parameters.dataset_file
-    coco_path = os.path.join(cfg.project_path, cfg.detr.parameters.coco_path)
-    device = cfg.detr.parameters.device
-    output_dir = os.path.join(cfg.project_path, cfg.detr.parameters.output_dir)
+    output_path = os.path.join(cfg.project_path, cfg.detr.parameters.output_dir)
 
-    if (mode == "train"):
-        batch_size = cfg.training.batch
-        epochs = cfg.training.epochs
-        num_classes = cfg.datasets.n_classes
-        resume = cfg.detr.parameters.resume  # detr-resnet50
+    config = {
+        "image_path" : os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path),
+        "feature_extractor" : cfg.detr.parameters.feature_extractor,
+        "train_batch_size" : cfg.training.batch,
+        "test_batch_size" : cfg.training.val_batch,
+        "lr" : cfg.training.lr,
+        "lr_backbone" : cfg.detr.parameters.lr_backbone,
+        "weight_decay" : cfg.training.weight_decay,
+        "max_epochs" : cfg.training.epochs,
+        "gradient_clip_val" : cfg.detr.parameters.gradient_clip_val,
+        "patience" : cfg.training.early_stopping.patience,
 
-        config = f"{venv_python_path} {main_path} " \
-                 f"--batch_size={batch_size} " \
-                 f"--epochs={epochs} " \
-                 f"--num_classes={num_classes} " \
-                 f"--dataset_file={dataset_file} " \
-                 f"--coco_path {coco_path} " \
-                 f"--output_dir={output_dir} " \
-                 f"--device={device} " \
-                 f"--resume={resume}"
+        "train_json_annot_path" : os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.train),
+        "val_json_annot_path" : os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.val),
+        "test_json_annot_path" : os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.test),
 
-    else:
-        num_classes = cfg.datasets.n_classes + 1
-        resume = os.path.join(output_dir, cfg.detr.detr_model_path)  # trained model
-        output_dir = os.path.join(output_dir, "eval_outputs")
+        "output_path" : output_path,
+        "model_path" : cfg.detr.detr_model_path,
 
-        config = f"{venv_python_path} {main_path} " \
-                 f"--num_classes={num_classes} " \
-                 f"--dataset_file={dataset_file} " \
-                 f"--coco_path {coco_path} " \
-                 f"--output_dir={output_dir} " \
-                 f"--device={device} " \
-                 f"--resume={resume} " \
-                 f"--eval"
+        "num_classes" : cfg.datasets.n_classes,
 
-        print(config)
+        "logs_dir": cfg.detr.parameters.logs_dir
+    }
 
     return config
 
@@ -159,7 +150,8 @@ def prepare_config(cfg, mode):
             os.makedirs(actual_config_path)
 
         model_config_path = os.path.join(actual_config_path, cfg.yolo.yolo_config.model_config)
-        data_config_path = os.path.join(actual_config_path, cfg.yolo.yolo_config.data_config)
+        data_config_path = os.path.join(actual_config_path, cfg.yolo.yolo_config.data_config_train)
+        data_config_path_test = os.path.join(actual_config_path, cfg.yolo.yolo_config.data_config_test)
 
         train_path = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.yolo.train)
         val_path = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.yolo.val)
@@ -169,11 +161,16 @@ def prepare_config(cfg, mode):
         create_config_file(data_template_path, data_config_path,
                            class_list_names=cfg.datasets.class_name,
                            train_path=train_path,
-                           val_path=val_path,
-                           test_path=test_path
+                           val_path=val_path
                            )
 
-        config = get_yolo_configuration(cfg)
+        create_config_file(data_template_path, data_config_path_test,
+                           class_list_names=cfg.datasets.class_name,
+                           train_path=train_path,
+                           val_path=test_path
+                           )
+
+        config = get_yolo_configuration(cfg, mode)
 
         return config
 
@@ -186,3 +183,10 @@ def prepare_config(cfg, mode):
         config = get_detr_configuration(cfg,mode)
 
         return config
+
+@hydra.main(config_path="../../config/", config_name="config", version_base=None)
+def main(cfg):
+    prepare_config(cfg, mode="train")
+
+if __name__ == '__main__':
+    main()

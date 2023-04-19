@@ -1,3 +1,5 @@
+import json
+
 import hydra
 import os
 import cv2
@@ -7,8 +9,13 @@ from ultralytics import YOLO
 from detectron2.engine import DefaultPredictor
 from detectron2.data import DatasetCatalog
 from detectron2.utils.visualizer import Visualizer
+from transformers import DetrFeatureExtractor
 
+from models.detr.detr import Detr
 from scripts.py.prepare_config import prepare_config
+from models.detr.prediction import visualize_predictions
+
+from PIL import Image
 
 
 @hydra.main(config_path="./config/", config_name="config")
@@ -67,6 +74,39 @@ def detect(cfg):
             # Save the image with the bounding boxes
             output_path = os.path.join(output_folder, os.path.basename(d["file_name"]))
             cv2.imwrite(output_path, v.get_image()[:, :, ::-1])
+
+    if cfg.model == "detr":
+        # define paths to input and output folders
+        input_folder = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
+        output_folder = os.path.join(cfg.project_path, cfg.detr.detr_detect_output_path)
+
+        test_annotation_file = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.test)
+
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+        with open(test_annotation_file, 'r') as f:
+            test_data = json.load(f)
+
+
+        model_path = os.path.join(os.path.join(cfg.project_path, cfg.detr.parameters.output_dir), cfg.detr.detr_model_path)
+        feature_extractor = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
+        model = Detr(num_labels=cfg.datasets.n_classes)
+        model = model.load_from_checkpoint(model_path)
+        model.eval()
+
+
+        for image_info in test_data["images"]:
+            image_name = image_info["file_name"]
+            image_path = os.path.join(input_folder, image_name)
+
+            img = Image.open(image_path)
+
+            encoding = feature_extractor(img, return_tensors="pt")
+            encoding.keys()
+
+            outputs = model(**encoding)
+            visualize_predictions(img, outputs, output_folder, image_name)
 
 if __name__ == '__main__':
     detect()

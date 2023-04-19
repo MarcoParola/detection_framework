@@ -1,13 +1,9 @@
-import argparse
-import os
-import subprocess
-
 import hydra
 import os
 from ultralytics import YOLO
-from detectron2.engine import DefaultTrainer
 from scripts.py.prepare_config import prepare_config
 from print_test import CustomTrainer
+from models.detr.train import DetrTrainer
 
 
 @hydra.main(config_path="./config/", config_name="config", version_base=None)
@@ -31,18 +27,8 @@ def train(cfg):
             print(f"\033[32mEarly stopping triggered \033[0m")
 
     if cfg.model == "detr":
+        DetrTrainer(**config).main()
 
-        process = subprocess.Popen(config.split(), stdout=subprocess.PIPE)
-
-        # Read the output of the subprocess while it is running
-        while True:
-            output = process.stdout.readline()
-            if not output:
-                break
-            print(output.decode().strip())
-
-        # Wait for the subprocess to finish
-        process.wait()
 
 
 if __name__ == '__main__':
