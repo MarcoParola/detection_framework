@@ -4,6 +4,7 @@ import fiftyone as fo
 import cv2
 import numpy as np
 
+
 def convert_bbox_format(bbox, img_width, img_height):
     x, y, w, h = bbox
     x1 = int((x - w / 2) * img_width)
@@ -13,7 +14,7 @@ def convert_bbox_format(bbox, img_width, img_height):
     return x1, y1, x2, y2
 
 
-@hydra.main(config_path="./config/", config_name="config")
+@hydra.main(config_path="./config/", config_name="config", version_base=None)
 def view(cfg):
     if cfg.dataset == 'yolo':
         # Load the YOLO labels and images
@@ -67,6 +68,7 @@ def view(cfg):
 
         session = fo.launch_app(dataset)
         session.wait()
+
 
 if __name__ == '__main__':
     view()

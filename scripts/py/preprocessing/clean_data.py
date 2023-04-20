@@ -5,9 +5,6 @@ import os
 import shutil
 
 
-
-
-
 def move_jpg_files_to_images_folder(src_folder, dest_folder):
     file_count = 0
 
@@ -51,9 +48,8 @@ def remove_images_not_in_coco(images_folder, coco_image_filenames):
         if os.path.isfile(full_path) and entry not in coco_image_filenames:
             os.remove(full_path)
             removed_count += 1
-    print(f'Removed {removed_count} images from the "images" folder that do not have a corresponding "file_name" in the COCO annotation file.')
-
-
+    print(
+        f'Removed {removed_count} images from the "images" folder that do not have a corresponding "file_name" in the COCO annotation file.')
 
 
 def remove_missing_images_from_coco(coco_annotation_file, images_folder):
@@ -81,11 +77,9 @@ def remove_missing_images_from_coco(coco_annotation_file, images_folder):
     return coco_data
 
 
-
 def save_coco_annotation(data, output_file):
     with open(output_file, 'w') as f:
         json.dump(data, f)
-
 
 
 def remove_duplicate_filenames(coco_annotation_file):
@@ -121,7 +115,6 @@ def remove_duplicate_filenames(coco_annotation_file):
     return coco_data, duplicate_images
 
 
-
 def remove_images(images_to_remove, images_folder):
     for image_file in images_to_remove:
         file_path = os.path.join(images_folder, image_file)
@@ -131,7 +124,6 @@ def remove_images(images_to_remove, images_folder):
 
 
 def rename_all_images_in_filesystem(coco_file_name, images_folder):
-
     with open(coco_file_name, 'r') as f:
         coco_data = json.load(f)
 
@@ -151,7 +143,7 @@ def rename_all_images_in_filesystem(coco_file_name, images_folder):
         else:
             print(f'File not found: "{old_filename}"')
 
-        
+
 def rename_all_images_in_cocofile(coco_file_name, image_folder):
     # Load the COCO annotation file
     with open(coco_file_name, "r") as json_file:
@@ -166,10 +158,8 @@ def rename_all_images_in_cocofile(coco_file_name, image_folder):
     return coco_data
 
 
-
-@hydra.main(config_path="../../../config/", config_name="config")
+@hydra.main(config_path="../../../config/", config_name="config", version_base=None)
 def clean(cfg):
-
     # Replace 'your_source_folder_path' with the path to the folder you want to search
     src_folder = os.path.join(cfg.project_path, 'data/orig/tmp')
     # Replace 'your_destination_folder_path' with the path to the destination folder
@@ -178,7 +168,8 @@ def clean(cfg):
 
     # Replace 'your_coco_annotation_file_path' with the path to your COCO annotation file
     coco_annotation_file = os.path.join(cfg.datasets.path, cfg.datasets.original_data, cfg.datasets.filenames.dataset)
-    coco_annotation_file_tmp = os.path.join(cfg.datasets.path, cfg.datasets.original_data, 'preprocessed_' + cfg.datasets.filenames.dataset)
+    coco_annotation_file_tmp = os.path.join(cfg.datasets.path, cfg.datasets.original_data,
+                                            'preprocessed_' + cfg.datasets.filenames.dataset)
 
     coco_image_filenames = get_coco_image_filenames(coco_annotation_file)
     remove_images_not_in_coco(dest_folder, coco_image_filenames)
@@ -186,13 +177,12 @@ def clean(cfg):
     filtered_coco_data = remove_missing_images_from_coco(coco_annotation_file, dest_folder)
     save_coco_annotation(filtered_coco_data, coco_annotation_file_tmp)
 
-
     filtered_coco_data, duplicate_image_files = remove_duplicate_filenames(coco_annotation_file_tmp)
     remove_images(duplicate_image_files, dest_folder)
     save_coco_annotation(filtered_coco_data, coco_annotation_file_tmp)
-    
+
     rename_all_images_in_filesystem(coco_annotation_file_tmp, dest_folder)
-    
+
     renamed_coco_data = rename_all_images_in_cocofile(coco_annotation_file_tmp, dest_folder)
     save_coco_annotation(renamed_coco_data, coco_annotation_file_tmp)
 

@@ -12,7 +12,7 @@ from detectron2.data import detection_utils as utils
 from detectron2.data.build import (_test_loader_from_config, build_detection_train_loader)
 
 
-class CustomTrainer(DefaultTrainer):
+class FastercnnTrainer(DefaultTrainer):
 
     def __init__(self, cfg, early_stop_patience=5):
         super().__init__(cfg)
@@ -42,7 +42,7 @@ class CustomTrainer(DefaultTrainer):
                 evaluator = COCOEvaluator(self.cfg.DATASETS.TEST[0], self.cfg, False, output_dir=self.cfg.OUTPUT_DIR)
                 val_loader = build_detection_test_loader(self.cfg, self.cfg.DATASETS.TEST[0])
                 inference_on_dataset(self.model, val_loader, evaluator)
-                raise Exception('Early stopping triggered')
+                raise RuntimeError('Early stopping triggered')
 
     def compute_validation_loss(self, val_loader):
         total_loss = 0.0

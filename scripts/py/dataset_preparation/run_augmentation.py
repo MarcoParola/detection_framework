@@ -5,6 +5,7 @@ import os
 import imgaug.augmenters as iaa
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
+
 def augment_image_and_annotation(image, annotation):
     # Define the augmentation pipeline
     seq = iaa.Sequential([
@@ -19,7 +20,6 @@ def augment_image_and_annotation(image, annotation):
             mode="edge"
         )
     ])
-
 
     # Convert COCO format bounding boxes to imgaug format
     bbs = BoundingBoxesOnImage([
@@ -70,34 +70,37 @@ def perform_augmentation(coco_data, images_input_path, images_output_path, initi
                 height_clipped = y2_clipped - y1_clipped
 
                 if width_clipped > 0 and height_clipped > 0:
-                  annotations_aug.append({
-                      "id": len(new_annotations) + initial_annotation_id + 1 + bb_idx,
-                      "image_id": len(new_images) + initial_image_id,
-                      "category_id": img_annotations["annotations"][bb_idx]["category_id"],
-                      "area": int(width_clipped * height_clipped),
-                      "bbox": [round(float(x1_clipped),1), round(float(y1_clipped),1), round(float(width_clipped),1), round(float(height_clipped),1)],
-                      "iscrowd": img_annotations["annotations"][bb_idx]["iscrowd"],
-                      "isbbox": img_annotations["annotations"][bb_idx]["isbbox"],
-                      "color": img_annotations["annotations"][bb_idx]["color"]
-                  })
+                    annotations_aug.append({
+                        "id": len(new_annotations) + initial_annotation_id + 1 + bb_idx,
+                        "image_id": len(new_images) + initial_image_id,
+                        "category_id": img_annotations["annotations"][bb_idx]["category_id"],
+                        "area": int(width_clipped * height_clipped),
+                        "bbox": [round(float(x1_clipped), 1), round(float(y1_clipped), 1),
+                                 round(float(width_clipped), 1), round(float(height_clipped), 1)],
+                        "iscrowd": img_annotations["annotations"][bb_idx]["iscrowd"],
+                        "isbbox": img_annotations["annotations"][bb_idx]["isbbox"],
+                        "color": img_annotations["annotations"][bb_idx]["color"]
+                    })
 
             new_annotations.extend(annotations_aug)
 
             # Save augmented image
             cv2.imwrite(os.path.join(images_output_path, f"aug_{i}_{img_info['file_name']}"), image_aug)
 
-    return new_images,new_annotations
+    return new_images, new_annotations
 
-def save_augmented_annotations(coco_data, new_images, new_annotations, annotationsFileOutput):
+
+def save_augmented_annotations(coco_data, new_images, new_annotations, annotations_file_output):
     coco_data_augmented = coco_data.copy()
     coco_data_augmented["images"].extend(new_images)
     coco_data_augmented["annotations"].extend(new_annotations)
 
-    with open(annotationsFileOutput, "w") as f:
+    with open(annotations_file_output, "w") as f:
         json.dump(coco_data_augmented, f)
 
-def get_initial_id(coco_data, testAnnotationFile):
-    with open(testAnnotationFile, "r") as f:
+
+def get_initial_id(coco_data, test_annotation_file):
+    with open(test_annotation_file, "r") as f:
         test_coco_data = json.load(f)
 
     # Sort the 'images' field by their 'id'
@@ -109,27 +112,29 @@ def get_initial_id(coco_data, testAnnotationFile):
     test_coco_data['annotations'] = sorted(test_coco_data['annotations'], key=lambda x: x['id'])
 
     initial_image_id = max(coco_data["images"][-1]["id"], test_coco_data["images"][-1]["id"])
-    initial_annotation_id = max(coco_data["annotations"][-1]["id"],test_coco_data["annotations"][-1]["id"])
+    initial_annotation_id = max(coco_data["annotations"][-1]["id"], test_coco_data["annotations"][-1]["id"])
 
     return initial_image_id, initial_annotation_id
 
-@hydra.main(config_path="../../../config/", config_name="config")
-def augmentation(cfg):
-    annotationsFile = os.path.join(cfg.datasets.path, 'coco', 'train.json')
-    testAnnotationFIle = os.path.join(cfg.datasets.path, 'coco', 'test.json')
-    images_input_path = os.path.join(cfg.datasets.path, cfg.datasets.img_path)
-    images_output_path =  os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
 
-    with open(annotationsFile, "r") as f:
+@hydra.main(config_path="../../../config/", config_name="config", version_base=None)
+def augmentation(cfg):
+    annotations_file = os.path.join(cfg.datasets.path, 'coco', 'train.json')
+    test_annotation_file = os.path.join(cfg.datasets.path, 'coco', 'test.json')
+    images_input_path = os.path.join(cfg.datasets.path, cfg.datasets.img_path)
+    images_output_path = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
+
+    with open(annotations_file, "r") as f:
         coco_data = json.load(f)
 
-    initial_image_id, initial_annotation_id = get_initial_id(coco_data, testAnnotationFIle)
+    initial_image_id, initial_annotation_id = get_initial_id(coco_data, test_annotation_file)
 
     print(initial_image_id, initial_annotation_id)
 
-    new_images, new_annotations = perform_augmentation(coco_data, images_input_path, images_output_path, initial_image_id, initial_annotation_id)
+    new_images, new_annotations = perform_augmentation(coco_data, images_input_path, images_output_path,
+                                                       initial_image_id, initial_annotation_id)
 
-    save_augmented_annotations(coco_data, new_images, new_annotations, annotationsFile)
+    save_augmented_annotations(coco_data, new_images, new_annotations, annotations_file)
 
 
 if __name__ == '__main__':

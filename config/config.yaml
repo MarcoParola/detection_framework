@@ -40,10 +40,12 @@ datasets:
   dataset_type: train  #Added by Lorenzo, ask Marco if ok -> used in coco_to_yolo.py
   datasets_path:
     coco:
+      folder: coco
       train: coco/train.json
       val: coco/val.json
       test: coco/test.json
     yolo:
+      folder: yolo
       train: yolo/train
       val: yolo/val
       test: yolo/test

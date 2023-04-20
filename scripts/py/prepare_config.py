@@ -10,9 +10,10 @@ from detectron2.data.datasets import register_coco_instances
 
 
 def get_yolo_configuration(cfg, mode):
-
+    """ Obtain the yolo configuration to be used for train or test """
     if (mode == "train"):
-        data_path = os.path.join(cfg.project_path, cfg.config.actual_config_path, cfg.yolo.yolo_config.data_config_train)
+        data_path = os.path.join(cfg.project_path, cfg.config.actual_config_path,
+                                 cfg.yolo.yolo_config.data_config_train)
     else:
         data_path = os.path.join(cfg.project_path, cfg.config.actual_config_path,
                                  cfg.yolo.yolo_config.data_config_test)
@@ -33,30 +34,29 @@ def get_yolo_configuration(cfg, mode):
     return config
 
 
-def get_detr_configuration(cfg, mode):
-
+def get_detr_configuration(cfg):
+    """ Obtain the detr configuration to be used for train or test """
     output_path = os.path.join(cfg.project_path, cfg.detr.parameters.output_dir)
 
     config = {
-        "image_path" : os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path),
-        "feature_extractor" : cfg.detr.parameters.feature_extractor,
-        "train_batch_size" : cfg.training.batch,
-        "test_batch_size" : cfg.training.val_batch,
-        "lr" : cfg.training.lr,
-        "lr_backbone" : cfg.detr.parameters.lr_backbone,
-        "weight_decay" : cfg.training.weight_decay,
-        "max_epochs" : cfg.training.epochs,
-        "gradient_clip_val" : cfg.detr.parameters.gradient_clip_val,
-        "patience" : cfg.training.early_stopping.patience,
+        "image_path": os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path),
+        "train_json_annot_path": os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.train),
+        "val_json_annot_path": os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.val),
+        "test_json_annot_path": os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.test),
+        "output_path": output_path,
+        "model_path": cfg.detr.detr_model_path,
 
-        "train_json_annot_path" : os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.train),
-        "val_json_annot_path" : os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.val),
-        "test_json_annot_path" : os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.coco.test),
+        "feature_extractor": cfg.detr.parameters.feature_extractor,
+        "train_batch_size": cfg.training.batch,
+        "test_batch_size": cfg.training.val_batch,
+        "lr": cfg.training.lr,
+        "lr_backbone": cfg.detr.parameters.lr_backbone,
+        "weight_decay": cfg.training.weight_decay,
+        "max_epochs": cfg.training.epochs,
+        "gradient_clip_val": cfg.detr.parameters.gradient_clip_val,
+        "patience": cfg.training.early_stopping.patience,
 
-        "output_path" : output_path,
-        "model_path" : cfg.detr.detr_model_path,
-
-        "num_classes" : cfg.datasets.n_classes,
+        "num_classes": cfg.datasets.n_classes,
 
         "logs_dir": cfg.detr.parameters.logs_dir
     }
@@ -72,6 +72,8 @@ def get_num_images(json_path):
 
 
 def get_fastercnn_configuration(cfg, mode):
+    """ Obtain the fastercnn configuration to be used for train or test """
+
     images_path = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
     output_dir = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir)
 
@@ -90,16 +92,18 @@ def get_fastercnn_configuration(cfg, mode):
     # Get number of training images
     num_train_images = get_num_images(train_json_annot_path)
 
+    # Create configuration
     config = get_cfg()
 
     config.merge_from_file(model_zoo.get_config_file(cfg.fastercnn.parameters.config_file_path))
     if mode == "train":
         config.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
             cfg.fastercnn.parameters.checkpoint_url)  # Let training initialize from model zoo
-        config.DATASETS.TEST = (cfg.fastercnn.parameters.val_dataset_name,)
+        config.DATASETS.TEST = (cfg.fastercnn.parameters.val_dataset_name,)  # Use the val dataset
     else:
-        config.MODEL.WEIGHTS = os.path.join(output_dir,cfg.fastercnn.fastercnn_model_path)
-        config.DATASETS.TEST = (cfg.fastercnn.parameters.test_dataset_name,)
+        config.MODEL.WEIGHTS = os.path.join(output_dir,
+                                            cfg.fastercnn.fastercnn_model_path)  # Use the trained model for the test
+        config.DATASETS.TEST = (cfg.fastercnn.parameters.test_dataset_name,)  # Use the test dataset
 
     config.DATASETS.TRAIN = (cfg.fastercnn.parameters.train_dataset_name,)
 
@@ -107,15 +111,16 @@ def get_fastercnn_configuration(cfg, mode):
 
     config.SOLVER.IMS_PER_BATCH = cfg.training.batch  # batch size
     config.SOLVER.BASE_LR = cfg.training.lr  # LR
-    config.SOLVER.MAX_ITER = math.ceil(num_train_images / cfg.training.batch * cfg.training.epochs)
+    config.SOLVER.MAX_ITER = math.ceil(
+        num_train_images / cfg.training.batch * cfg.training.epochs)  # Compute max_iter to get the right amount of epochs
 
     config.MODEL.ROI_HEADS.NUM_CLASSES = cfg.datasets.n_classes  # Set number of classes
     config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = cfg.test.confidence_threshold  # Set confidence score threshold for this model
     config.MODEL.ROI_HEADS.NMS_THRESH_TEST = cfg.test.iou_threshold  # Set iou score threshold for this model
     config.MODEL.DEVICE = cfg.fastercnn.parameters.device  # CUDA
 
-    config.TEST.EVAL_PERIOD = math.ceil(num_train_images / cfg.training.batch)
-
+    config.TEST.EVAL_PERIOD = math.ceil(
+        num_train_images / cfg.training.batch)  # Eval the quality of the models at each epoch
 
     config.OUTPUT_DIR = output_dir
     if not os.path.exists(output_dir):
@@ -125,6 +130,7 @@ def get_fastercnn_configuration(cfg, mode):
 
 
 def create_config_file(template_path, config_path, **kwargs):
+    """function to create a configuration file given a template"""
     with open(template_path, "r") as template_file:
         try:
             config = template_file.read()
@@ -136,8 +142,7 @@ def create_config_file(template_path, config_path, **kwargs):
 
 
 def prepare_config(cfg, mode):
-    '''function to create the configuration for a specific model starting from its 
-    template configuration file'''
+    """function that returns the configuration of each model to be used for training or test"""
 
     if cfg.model == 'yolo':
         model_template_path = os.path.join(cfg.project_path, cfg.config.templates_path,
@@ -157,6 +162,7 @@ def prepare_config(cfg, mode):
         val_path = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.yolo.val)
         test_path = os.path.join(cfg.datasets.path, cfg.datasets.datasets_path.yolo.test)
 
+        # Create actual_config yaml file from the templates
         create_config_file(model_template_path, model_config_path, nc=cfg.datasets.n_classes)
         create_config_file(data_template_path, data_config_path,
                            class_list_names=cfg.datasets.class_name,
@@ -175,18 +181,20 @@ def prepare_config(cfg, mode):
         return config
 
     if cfg.model == 'fasterRCNN':
-        config = get_fastercnn_configuration(cfg,mode)
+        config = get_fastercnn_configuration(cfg, mode)
 
         return config
 
     if cfg.model == 'detr':
-        config = get_detr_configuration(cfg,mode)
+        config = get_detr_configuration(cfg)
 
         return config
+
 
 @hydra.main(config_path="../../config/", config_name="config", version_base=None)
 def main(cfg):
     prepare_config(cfg, mode="train")
+
 
 if __name__ == '__main__':
     main()

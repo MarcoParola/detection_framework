@@ -4,17 +4,17 @@ import os
 import random
 import shutil
 
-@hydra.main(config_path="../../../config/", config_name="config")
-def split(cfg):
 
-    annotationsFile = os.path.join(cfg.datasets.path, cfg.preproc.preprocessed_annotation)
-    trainAnnotationFile = os.path.join(cfg.datasets.path,'coco','train.json')
-    testAnnotationFile = os.path.join(cfg.datasets.path, 'coco', 'test.json')
+@hydra.main(config_path="../../../config/", config_name="config", version_base=None)
+def split(cfg):
+    annotations_file = os.path.join(cfg.datasets.path, cfg.preproc.preprocessed_annotation)
+    train_annotation_file = os.path.join(cfg.datasets.path, 'coco', 'train.json')
+    test_annotation_file = os.path.join(cfg.datasets.path, 'coco', 'test.json')
     aug_images_path = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
 
     train_percentage = cfg.preproc.split_percentage
 
-    with open(annotationsFile, 'r') as f:
+    with open(annotations_file, 'r') as f:
         coco_data = json.load(f)
 
     # Shuffle the list of images in the JSON file
@@ -49,10 +49,10 @@ def split(cfg):
     }
 
     # Write each set to its own COCO JSON file
-    with open(trainAnnotationFile, 'w') as f:
+    with open(train_annotation_file, 'w') as f:
         json.dump(train_coco_data, f)
 
-    with open(testAnnotationFile, 'w') as f:
+    with open(test_annotation_file, 'w') as f:
         json.dump(test_coco_data, f)
 
     if not os.path.exists(aug_images_path):

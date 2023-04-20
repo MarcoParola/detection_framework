@@ -18,7 +18,7 @@ from models.detr.prediction import visualize_predictions
 from PIL import Image
 
 
-@hydra.main(config_path="./config/", config_name="config")
+@hydra.main(config_path="./config/", config_name="config", version_base=None)
 def detect(cfg):
     if cfg.model == 'yolo':
         model_path = os.path.join(cfg.project_path, cfg.yolo.parameters.output_dir, cfg.yolo.yolo_model_path)
@@ -45,13 +45,13 @@ def detect(cfg):
             output_path = os.path.join(output_folder, image_name)
             cv2.imwrite(output_path, res_plotted)
 
-
     if cfg.model == 'fasterRCNN':
         output_folder = os.path.join(cfg.project_path, cfg.fastercnn.fastercnn_detect_output_path)
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
 
-        cfg.fastercnn.parameters.checkpoint_url = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir, cfg.fastercnn.fastercnn_model_path)
+        cfg.fastercnn.parameters.checkpoint_url = os.path.join(cfg.project_path, cfg.fastercnn.parameters.output_dir,
+                                                               cfg.fastercnn.fastercnn_model_path)
         config = prepare_config(cfg, 'test')
 
         predictor = DefaultPredictor(config)
@@ -88,14 +88,15 @@ def detect(cfg):
         with open(test_annotation_file, 'r') as f:
             test_data = json.load(f)
 
-
-        model_path = os.path.join(os.path.join(cfg.project_path, cfg.detr.parameters.output_dir), cfg.detr.detr_model_path)
+        # Define the model and the feature extractor
+        model_path = os.path.join(os.path.join(cfg.project_path, cfg.detr.parameters.output_dir),
+                                  cfg.detr.detr_model_path)
         feature_extractor = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
         model = Detr(num_labels=cfg.datasets.n_classes)
         model = model.load_from_checkpoint(model_path)
         model.eval()
 
-
+        # Apply detection to each test image
         for image_info in test_data["images"]:
             image_name = image_info["file_name"]
             image_path = os.path.join(input_folder, image_name)
@@ -107,6 +108,7 @@ def detect(cfg):
 
             outputs = model(**encoding)
             visualize_predictions(img, outputs, output_folder, image_name)
+
 
 if __name__ == '__main__':
     detect()

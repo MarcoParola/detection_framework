@@ -3,6 +3,7 @@ import os
 import shutil
 import hydra
 
+
 def parse_coco_json(coco_json_file):
     with open(coco_json_file, "r") as f:
         data = json.load(f)
@@ -31,7 +32,7 @@ def save_class_names(class_dict, class_file):
             f.write(f"{class_dict[class_id]}\n")
 
 
-@hydra.main(config_path="../../../config/", config_name="config")
+@hydra.main(config_path="../../../config/", config_name="config", version_base=None)
 def coco_to_yolo(cfg):
     coco_json_file = os.path.join(cfg.datasets.path, 'coco', cfg.datasets.dataset_type) + ".json"
     label_folder = os.path.join(cfg.datasets.path, 'yolo', cfg.datasets.dataset_type, 'labels')
@@ -72,8 +73,6 @@ def coco_to_yolo(cfg):
             shutil.copy(image_path, images_folder)
 
     print(f"{cfg.datasets.dataset_type} -> Number of images moved: {len(data['images'])}")
-
-
 
 
 if __name__ == '__main__':

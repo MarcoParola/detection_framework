@@ -1,17 +1,14 @@
-import subprocess
-
-import hydra
 import os
+import hydra
 
-import torch
-from ultralytics import YOLO
 from detectron2.data import build_detection_test_loader
 from detectron2.engine import DefaultPredictor
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-
-from scripts.py.prepare_config import prepare_config
+from ultralytics import YOLO
 
 from models.detr.train import DetrTrainer
+from scripts.py.prepare_config import prepare_config
+
 
 @hydra.main(config_path="./config/", config_name="config", version_base=None)
 def test(cfg):
@@ -26,7 +23,8 @@ def test(cfg):
     if cfg.model == 'fasterRCNN':
         predictor = DefaultPredictor(config)
 
-        evaluator = COCOEvaluator(cfg.fastercnn.parameters.test_dataset_name, config, False, output_dir=cfg.fastercnn.parameters.output_dir)
+        evaluator = COCOEvaluator(cfg.fastercnn.parameters.test_dataset_name, config, False,
+                                  output_dir=cfg.fastercnn.parameters.output_dir)
         test_loader = build_detection_test_loader(config, cfg.fastercnn.parameters.test_dataset_name)
         inference_on_dataset(predictor.model, test_loader, evaluator)
 
