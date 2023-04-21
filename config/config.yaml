@@ -100,14 +100,13 @@ detr:
 
 training:
   wandb: false
-  lr: 1e-3
-  epochs: 50
+  lr: 5e-5
+  epochs: 200
   batch: 8
   val_batch: 2
   early_stopping:
     monitor: val_loss
-    min_delta: 0.0005
-    patience: 3
+    patience: 5
   weight_decay: 0.0001
   optimizer: SGD #added by lorenzo
   workers: 8 #added by lorenzo

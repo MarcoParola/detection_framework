@@ -75,6 +75,7 @@ def detect(cfg):
             output_path = os.path.join(output_folder, os.path.basename(d["file_name"]))
             cv2.imwrite(output_path, v.get_image()[:, :, ::-1])
 
+
     if cfg.model == "detr":
         # define paths to input and output folders
         input_folder = os.path.join(cfg.project_path, cfg.preproc.augmentation.img_path)
