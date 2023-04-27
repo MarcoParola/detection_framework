@@ -108,7 +108,7 @@ training:
     monitor: val_loss
     patience: 5
   weight_decay: 0.0001
-  optimizer: SGD #added by lorenzo
+  optimizer: Adam #added by lorenzo
   workers: 8 #added by lorenzo
   img_size: 640 #added by lorenzo
 

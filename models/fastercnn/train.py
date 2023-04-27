@@ -1,15 +1,8 @@
-import copy
-import os
-
 import torch
+from detectron2.data import build_detection_test_loader, DatasetMapper
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-from detectron2.data import build_detection_test_loader, DatasetMapper, MetadataCatalog
-from detectron2.modeling import build_model
 from detectron2.utils import comm
-
-from detectron2.data import detection_utils as utils
-from detectron2.data.build import (_test_loader_from_config, build_detection_train_loader)
 
 
 class FastercnnTrainer(DefaultTrainer):
@@ -24,8 +17,9 @@ class FastercnnTrainer(DefaultTrainer):
         super().after_step()
 
         # Early stopping condition
-        if (self.storage.iter + 1) % self.cfg.TEST.EVAL_PERIOD  == 0:
-            val_loader = iter(build_detection_test_loader(self.cfg, self.cfg.DATASETS.TEST, mapper=DatasetMapper(self.cfg, is_train=True)))
+        if (self.storage.iter + 1) % self.cfg.TEST.EVAL_PERIOD == 0:
+            val_loader = iter(build_detection_test_loader(self.cfg, self.cfg.DATASETS.TEST,
+                                                          mapper=DatasetMapper(self.cfg, is_train=True)))
             val_loss = self.compute_validation_loss(val_loader)
 
             print(f"\033[32mValidation Loss: {val_loss}\033[0m")
@@ -46,14 +40,16 @@ class FastercnnTrainer(DefaultTrainer):
 
     def compute_validation_loss(self, val_loader):
         total_loss = 0.0
-        num_batches = len(val_loader) # Calculate the number of batches in the validation loader
+        num_batches = len(val_loader)  # Calculate the number of batches in the validation loader
         # Iterate through the batches in the validation loader
         for i, data in enumerate(val_loader):
             with torch.no_grad():
-                loss_dict = self.model(data) # Pass the data through the model and compute the loss dictionary
-                losses = sum(loss_dict.values()) # Sum the losses in the loss dictionary to get the total loss for the current batch
-                assert torch.isfinite(losses).all(), loss_dict # Check if the computed loss values are finite and raise an exception with the loss dictionary if not
-                total_loss += losses.item() # Add the total loss of the current batch to the total loss across all batches
+                loss_dict = self.model(data)  # Pass the data through the model and compute the loss dictionary
+                losses = sum(
+                    loss_dict.values())  # Sum the losses in the loss dictionary to get the total loss for the current batch
+                assert torch.isfinite(
+                    losses).all(), loss_dict  # Check if the computed loss values are finite and raise an exception with the loss dictionary if not
+                total_loss += losses.item()  # Add the total loss of the current batch to the total loss across all batches
 
                 # If the current process is the main process, log individual losses for the last batch
                 if comm.is_main_process():
@@ -68,4 +64,3 @@ class FastercnnTrainer(DefaultTrainer):
             self.storage.put_scalar("val_total_loss", total_loss)
 
         return total_loss
-
