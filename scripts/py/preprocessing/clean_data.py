@@ -161,7 +161,7 @@ def rename_all_images_in_cocofile(coco_file_name, image_folder):
 @hydra.main(config_path="../../../config/", config_name="config", version_base=None)
 def clean(cfg):
     # Replace 'your_source_folder_path' with the path to the folder you want to search
-    src_folder = os.path.join(cfg.project_path, 'data/orig/tmp')
+    src_folder = os.path.join(cfg.project_path, 'data', 'orig', 'tmp')
     # Replace 'your_destination_folder_path' with the path to the destination folder
     dest_folder = os.path.join(cfg.project_path, cfg.preproc.orig.img_path)
     move_jpg_files_to_images_folder(src_folder, dest_folder)
