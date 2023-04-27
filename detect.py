@@ -7,7 +7,7 @@ import cv2
 from ultralytics import YOLO
 
 from detectron2.engine import DefaultPredictor
-from detectron2.data import DatasetCatalog
+from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.utils.visualizer import Visualizer
 from transformers import DetrFeatureExtractor
 
@@ -69,7 +69,7 @@ def detect(cfg):
             indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:1]
             instances = instances[indices]
             # Visualize the predictions on the image
-            v = Visualizer(img[:, :, ::-1])
+            v = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.fastercnn.parameters.test_dataset_name))
             v = v.draw_instance_predictions(instances.to("cpu"))
             # Save the image with the bounding boxes
             output_path = os.path.join(output_folder, os.path.basename(d["file_name"]))
@@ -108,7 +108,7 @@ def detect(cfg):
             encoding.keys()
 
             outputs = model(**encoding)
-            visualize_predictions(img, outputs, output_folder, image_name)
+            visualize_predictions(img, outputs, output_folder, image_name, cfg.datasets.class_name)
 
 
 if __name__ == '__main__':
