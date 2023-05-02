@@ -3,7 +3,6 @@ model: yolo
 dataset: coco
 model_name: model
 
-#added by lorenzo
 config:
   config_path: config
   templates_path: config/templates
@@ -14,11 +13,11 @@ preproc:
   orig:
     img_path: data/orig/images
   augmentation:
-    img_path: data/coco/aug_images #Added by Lorenzo, ask Marco if ok -> used in split1.py, run_augmentation.py, split2.py
+    img_path: data/coco/aug_images
   img_size:
     width: 640
     height: 640
-  split_percentage: 0.6 #Added by Lorenzo, ask Marco if ok -> used in split1.py and split2.py
+  split_percentage: 0.6
 
 datasets:
   n_classes: 3
@@ -31,13 +30,13 @@ datasets:
     - 'neoplastic'
     - 'aphthous'
     - 'traumatic'
-  class_file: classes.txt #Added by Lorenzo, ask Marco if ok -> used in coco_to_yolo.py
+  class_file: classes.txt
   path: ${hydra:runtime.cwd}/data/
   img_path: images/
   original_data: orig/
   filenames:
     dataset: coco_dataset.json
-  dataset_type: train  #Added by Lorenzo, ask Marco if ok -> used in coco_to_yolo.py
+  dataset_type: train
   datasets_path:
     coco:
       folder: coco
@@ -50,8 +49,6 @@ datasets:
       val: yolo/val
       test: yolo/test
 
-
-#added by lorenzo
 yolo:
   yolo_templates:
     model_template: yolov8-model-template.yaml
@@ -67,8 +64,6 @@ yolo:
   yolo_model_path: train/weights/best.pt
   yolo_detect_output_path: outputs/yolo/model_results_on_test
 
-
-#added by lorenzo
 fastercnn:
   parameters:
     train_dataset_name: oralcancer_train
@@ -96,8 +91,6 @@ detr:
   detr_detect_output_path: outputs/detr/model_results_on_test
 
 
-
-
 training:
   wandb: false
   lr: 5e-5
@@ -108,9 +101,9 @@ training:
     monitor: val_loss
     patience: 5
   weight_decay: 0.0001
-  optimizer: Adam #added by lorenzo
-  workers: 8 #added by lorenzo
-  img_size: 640 #added by lorenzo
+  optimizer: Adam
+  workers: 8
+  img_size: 640
 
 test:
   confidence_threshold: 0.2
