@@ -7,3 +7,4 @@ __pycache__/
 /env
 .idea
 ./yolov8n.pt
+preds.npy

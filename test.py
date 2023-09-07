@@ -15,6 +15,7 @@ def test(cfg):
 
     if cfg.model == 'yolo':
         model_path = os.path.join(cfg.project_path, cfg.yolo.parameters.output_dir, cfg.yolo.yolo_model_path)
+        print(model_path)
         model = YOLO(model_path)  # load a custom model
         # Validate the model
         model.val(**config)  # no arguments needed, dataset and settings remembered

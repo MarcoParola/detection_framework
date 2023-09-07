@@ -74,5 +74,20 @@ To specify the name with which to save the model after fine tuning you can use t
 
 > python train.py model=fasterRCNN dataset=coco.json model_name=**name**
 
+# TODO
+
+- sposta manualmente il modello post fine allenamento
+- cambia il salvataggio di yolo (viene salvato nella root)
+- commenta 3 righe di detr in caso di errore
+- cambia parametro fasterRCNN per stampare map50 o map50-95, Questa riga https://github.com/facebookresearch/detectron2/blob/main/detectron2/evaluation/coco_evaluation.py?plain=1#L370, se la lasci normale calcola 50_95, se la cambi con precisions[0, :, idx, 0, -1] calcola 0.50
+- riduci il batch in caso in cui non hai abbastanza memoria in gpu
+- conversione etichette nel dataset (forse l'avevo fatto?)
+- per testare yolo, sposta il file dei pesi in ./detection_framework\outputs\yolo\model_outputs\train\weights
+- pip freeze, 3 librerie di torch non funzionano
+- se non funziona cuda: pip install torch==2.0.0+cu117 torchvision==0.15.1+cu117 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu117
+- ho aggiunto una funzione 'get_predictions' in C:\Users\marco\OneDrive\Documenti\uni\detection_framework\models\detr\prediction.py, NB includilo tra le import
+- se ci sono problemi con ultralytics: pip install -U ultralytics
+
+
 
 

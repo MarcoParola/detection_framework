@@ -95,8 +95,8 @@ training:
   wandb: false
   lr: 5e-5
   epochs: 200
-  batch: 8
-  val_batch: 2
+  batch: 2
+  val_batch: 1
   early_stopping:
     monitor: val_loss
     patience: 5
