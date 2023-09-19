@@ -1,20 +1,22 @@
 # **Detection framework**
 
-[![license](https://img.shields.io/static/v1?label=OS&message=linux|osx&color=green&style=plastic)]()
+
+[![license](https://img.shields.io/static/v1?label=OS&message=Windows&color=green&style=plastic)]()
 [![Python](https://img.shields.io/static/v1?label=Python&message=3.10&color=blue&style=plastic)]()
 [![size](https://img.shields.io/github/languages/code-size/MarcoParola/detection_framework?style=plastic)]()
 [![license](https://img.shields.io/github/license/MarcoParola/detection_framework?style=plastic)]()
 
 
+The project concerns the development of an object detection ensemble architecture presented at [IEEE SSCI-2023](https://attend.ieee.org/ssci-2023/).
+A python wrapping framework for performing object detection tasks using state-of-the-art deep learning architecture: YOLOv7, Faster R-CNN, DEtection TRansformer DE-TR.
+
+<img title="a title" width="400" alt="Alt text" src="./img/ensemble-architecture.jpg">
 
 
-A python wrapping framework for performing object detection tasks using deep learning architecture:
-- YOLOv7
-- Faster R-CNN
-- DEtection TRansformer DE-TR
+The architecture was tested on an oral cancer dataset, below are some examples of predictions
 
-
-
+<img title="a title" alt="Alt text" src="./img/predictions1.jpg">
+<img title="a title" alt="Alt text" src="./img/predictions8.jpg">
 
 ## **Installation**
 
@@ -87,7 +89,4 @@ To specify the name with which to save the model after fine tuning you can use t
 - se non funziona cuda: pip install torch==2.0.0+cu117 torchvision==0.15.1+cu117 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu117
 - ho aggiunto una funzione 'get_predictions' in C:\Users\marco\OneDrive\Documenti\uni\detection_framework\models\detr\prediction.py, NB includilo tra le import
 - se ci sono problemi con ultralytics: pip install -U ultralytics
-
-
-
 

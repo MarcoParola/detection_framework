@@ -8,3 +8,7 @@ __pycache__/
 .idea
 ./yolov8n.pt
 preds.npy
+
+*.pt
+*.pth
+*.json
