@@ -7,7 +7,8 @@
 [![license](https://img.shields.io/github/license/MarcoParola/detection_framework?style=plastic)]()
 
 
-The project concerns the development of an object detection ensemble architecture presented at [IEEE SSCI-2023](https://attend.ieee.org/ssci-2023/).
+The project concerns the development of an object detection ensemble architecture presented at [IEEE SSCI-2023](https://attend.ieee.org/ssci-2023/). Full text is available [here](https://ieeexplore.ieee.org/document/10371865).
+
 A python wrapping framework for performing object detection tasks using state-of-the-art deep learning architecture: YOLOv7, Faster R-CNN, DEtection TRansformer DE-TR.
 
 <img title="a title" width="400" alt="Alt text" src="./img/ensemble-architecture.jpg">
@@ -76,17 +77,16 @@ To specify the name with which to save the model after fine tuning you can use t
 
 > python train.py model=fasterRCNN dataset=coco.json model_name=**name**
 
-# TODO
-
-- sposta manualmente il modello post fine allenamento
-- cambia il salvataggio di yolo (viene salvato nella root)
-- commenta 3 righe di detr in caso di errore
-- cambia parametro fasterRCNN per stampare map50 o map50-95, Questa riga https://github.com/facebookresearch/detectron2/blob/main/detectron2/evaluation/coco_evaluation.py?plain=1#L370, se la lasci normale calcola 50_95, se la cambi con precisions[0, :, idx, 0, -1] calcola 0.50
-- riduci il batch in caso in cui non hai abbastanza memoria in gpu
-- conversione etichette nel dataset (forse l'avevo fatto?)
-- per testare yolo, sposta il file dei pesi in ./detection_framework\outputs\yolo\model_outputs\train\weights
-- pip freeze, 3 librerie di torch non funzionano
-- se non funziona cuda: pip install torch==2.0.0+cu117 torchvision==0.15.1+cu117 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu117
-- ho aggiunto una funzione 'get_predictions' in C:\Users\marco\OneDrive\Documenti\uni\detection_framework\models\detr\prediction.py, NB includilo tra le import
-- se ci sono problemi con ultralytics: pip install -U ultralytics
-
+If you find this repo useful, please cite it as:
+```
+@INPROCEEDINGS{10371865,
+  author={Parola, Marco and Mantia, Gaetano La and Galatolo, Federico and Cimino, Mario G.C.A. and Campisi, Giuseppina and Di Fede, Olga},
+  booktitle={2023 IEEE Symposium Series on Computational Intelligence (SSCI)}, 
+  title={Image-Based Screening of Oral Cancer via Deep Ensemble Architecture}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={1572-1578},
+  doi={10.1109/SSCI52147.2023.10371865}
+}
+```
